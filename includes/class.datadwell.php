@@ -136,9 +136,10 @@ class DataDwell {
 			else if(is_object($assets))
 			{
 				$asset_ids = [];
-				foreach($assets->assets as $asset)
-				{
-					$asset_ids[] = $asset->id;
+				if(!empty($assets->assets)) {
+					foreach ( $assets->assets as $asset ) {
+						$asset_ids[] = $asset->id;
+					}
 				}
 			}
 			else if(is_array($assets))

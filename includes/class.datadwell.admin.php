@@ -48,7 +48,7 @@ class DataDwellAdmin {
     public function add_options_link( $links )
     {
         
-        $options_link = '<a href="options-general.php?page=datadwell_settings">' . __( 'Settings', 'datadwell' ) . '</a>';
+        $options_link = '<a href="options-general.php?page=datadwell-settings">' . __( 'Settings', 'datadwell' ) . '</a>';
 		array_push( $links, $options_link );
 
 		return $links;
@@ -58,10 +58,10 @@ class DataDwellAdmin {
 	 * Load settings page content
 	 */
 	public function page_settings() {
-
         add_option('datadwell_domain', '', null, true);
 		add_option('datadwell_apikey', '', null, true);
 		include $this->dir . '/views/settings.php';
+		include $this->dir . '/views/demo.php';
 	}
 
     /**
