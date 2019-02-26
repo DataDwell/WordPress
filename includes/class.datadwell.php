@@ -81,17 +81,26 @@ class DataDwell {
 	 *
 	 * @return object directly from the API: https://datadwell.docs.apiary.io/#reference/assets/search/search-assets
 	 */
-	public function asset_search($query, $from = 0, $size = 20, $includes = null)
+	public function asset_search($query, $from = 0, $size = 20, $includes = null, $additional_params = null)
 	{
 		$url = $this->prepare_api_url('assets/search', $includes);
 		if(!is_null($url))
 		{
 			$args = $this->prepare_api_args();
-			$args['body'] = json_encode((object) [
+			$params = [];
+
+			if(!empty($additional_params)){
+				$params = $additional_params;
+			}
+
+			$params += [
 				'query' => $query,
 				'from' => $from,
 				'size' => $size
-			]);
+			];
+
+			$args['body'] = json_encode((object)$params);
+
 			$response = wp_remote_post($url, $args);
 			return json_decode($response['body']);
 		}
@@ -203,6 +212,42 @@ class DataDwell {
 	public function folder_create($name, $parent_folder_id)
 	{
 		return 1;
+	}
+
+	/**
+	 * Get folders
+	 *
+	 * @return Get all subfolders for given folder. If no folder ID is provided the base folders will be returned.
+	 */
+	public function get_folders($folder_id = null)
+	{
+		$url = $this->prepare_api_url('folders/list/' . $folder_id);
+		if(!is_null($url))
+		{
+			$args = $this->prepare_api_args('GET');
+
+			$response = wp_remote_get($url, $args);
+			return json_decode($response['body']);
+		}
+		return null;
+	}
+
+	/**
+	 * Get folder details
+	 *
+	 * @return Return base details for the folder.
+	 */
+	public function get_folder_details($folder_id)
+	{
+		$url = $this->prepare_api_url('folders/details/' . $folder_id);
+		if(!is_null($url))
+		{
+			$args = $this->prepare_api_args('GET');
+
+			$response = wp_remote_get($url, $args);
+			return json_decode($response['body']);
+		}
+		return null;
 	}
 
     /**
