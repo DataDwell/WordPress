@@ -128,6 +128,19 @@ class DataDwell {
 		return null;
 	}
 
+	public function tags_search($value)
+	{
+		$url = $this->prepare_api_url('tags/search');
+		if(!is_null($url))
+		{
+			$args = $this->prepare_api_args();
+			$args['body'] = json_encode( ["query" => $value] );
+			$response = wp_remote_post($url, $args);
+			return json_decode($response['body']);
+		}
+		return null;
+	}
+
     /**
 	 * Asset previews, fetch thumbnails and previews for assets
 	 *

@@ -39,6 +39,11 @@ $previews = DataDwell()->asset_previews($asset_container);
 var_dump($previews);
 */
 
+//print 'Tags search';
+//$tag = DataDwell()->tags_search("00123595");
+//var_dump($tag);
+
+
 /* END DEMO */
 
 ?>
