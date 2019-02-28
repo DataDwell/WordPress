@@ -217,6 +217,42 @@ class DataDwell {
 		return null;
 	}
 
+	/**
+	 * Get asset source url https://datadwell.docs.apiary.io/#reference/assets/source/get-source
+	 *
+	 * @return Returns URL to the source file for the asset.
+	 */
+	public function get_asset_source($asset_id)
+	{
+		$url = $this->prepare_api_url('assets/source/' . $asset_id);
+		if(!is_null($url))
+		{
+			$args = $this->prepare_api_args('GET');
+
+			$response = wp_remote_get($url, $args);
+			return json_decode($response['body']);
+		}
+		return null;
+	}
+
+	/**
+	 * Get asset thumbnail urls https://datadwell.docs.apiary.io/#reference/assets/thumbnail/get-thumbnail
+	 *
+	 * @return Returns URL to the source file for the asset.
+	 */
+	public function get_asset_thumbnail($asset_id, $size = 'medium')
+	{
+		$url = $this->prepare_api_url('assets/thumbnail/'.$asset_id .'/'.$size);
+		if(!is_null($url))
+		{
+			$args = $this->prepare_api_args('GET');
+
+			$response = wp_remote_get($url, $args);
+			return json_decode($response['body']);
+		}
+		return null;
+	}
+
     /**
 	 * Create folder
 	 *

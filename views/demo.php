@@ -44,6 +44,15 @@ var_dump($previews);
 //var_dump($tag);
 
 
+print 'Asset source';
+$source = DataDwell()->get_asset_source(111);
+var_dump($source);
+
+print 'Asset source';
+$source = DataDwell()->get_asset_thumbnail(111);
+var_dump($source);
+
+
 /* END DEMO */
 
 ?>
