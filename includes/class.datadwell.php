@@ -76,22 +76,47 @@ class DataDwell {
 		return null;
 	}
 
+	private function get_response($uri, $body = null, $includes = null, $method = 'GET'){
+		$url = $this->prepare_api_url($uri, $includes);
+		if(!is_null($url))
+		{
+			$args = $this->prepare_api_args($method);
+
+			if($body){
+				$args['body'] = json_encode($body);
+			}
+
+			$response = wp_remote_get($url, $args);
+			return json_decode($response['body']);
+		}
+		return null;
+	}
+
     /**
 	 * Asset search, simple text search of assets
 	 *
 	 * @return object directly from the API: https://datadwell.docs.apiary.io/#reference/assets/search/search-assets
 	 */
-	public function asset_search($query, $from = 0, $size = 20, $includes = null)
+	public function asset_search($query, $from = 0, $size = 20, $includes = null, $additional_params = null)
 	{
+
 		$url = $this->prepare_api_url('assets/search', $includes);
 		if(!is_null($url))
 		{
 			$args = $this->prepare_api_args();
-			$args['body'] = json_encode((object) [
+			$params = [];
+
+			if(!empty($additional_params)){
+				$params = $additional_params;
+			}
+
+			$params += [
 				'query' => $query,
 				'from' => $from,
 				'size' => $size
-			]);
+			];
+
+			$args['body'] = json_encode((object)$params);
 			$response = wp_remote_post($url, $args);
 			return json_decode($response['body']);
 		}
@@ -106,17 +131,11 @@ class DataDwell {
 	 */
 	public function asset_search_advanced($body, $from = 0, $size = 20, $includes = null)
 	{
-		$url = $this->prepare_api_url('assets/search', $includes);
-		if(!is_null($url))
-		{
-			$args = $this->prepare_api_args();
-			$body->from = $from;
-			$body->size = $size;
-			$args['body'] = json_encode($body);
-			$response = wp_remote_post($url, $args);
-			return json_decode($response['body']);
-		}
-		return null;
+		$body->from = $from;
+		$body->size = $size;
+		$uri = 'assets/search';
+
+		return $this->get_response($uri, $body, $includes);
 	}
 
     /**
@@ -126,37 +145,42 @@ class DataDwell {
 	 */
 	public function asset_previews($assets)
 	{
-		$url = $this->prepare_api_url('assets/preview');
-		if(!is_null($url))
+		if(is_numeric($assets))
 		{
-			if(is_numeric($assets))
-			{
-				$asset_ids = [$assets];
-			}
-			else if(is_object($assets))
-			{
-				$asset_ids = [];
-				if(!empty($assets->assets)) {
-					foreach ( $assets->assets as $asset ) {
-						$asset_ids[] = $asset->id;
-					}
+			$asset_ids = [$assets];
+		}
+		else if(is_object($assets))
+		{
+			$asset_ids = [];
+			if(!empty($assets->assets)) {
+				foreach ( $assets->assets as $asset ) {
+					$asset_ids[] = $asset->id;
 				}
 			}
-			else if(is_array($assets))
-			{
-				$asset_ids = $assets;
-			}
-			else
-			{
-				return [];
-			}
-			$args = $this->prepare_api_args();
-			$args['body'] = json_encode($asset_ids);
-			
-			$response = wp_remote_post($url, $args);
-			return json_decode($response['body']);
 		}
-		return null;
+		else if(is_array($assets))
+		{
+			$asset_ids = $assets;
+		}
+		else
+		{
+			return [];
+		}
+
+		$uri = 'assets/preview';
+		return $this->get_response($uri, $asset_ids, null, 'POST');
+	}
+
+	/**
+	 * https://datadwell.docs.apiary.io/#reference/tag/search/search-tags
+	 *
+	 * @return Return list of tags matching the query.
+	 */
+	public function tags_search($value)
+	{
+		$body = ["query" => $value];
+		$uri = 'tags/search';
+		return $this->get_response($uri, $body);
 	}
 
     /**
@@ -166,15 +190,8 @@ class DataDwell {
 	 */
 	public function metadata_get_fields($parent_metafield_id = null)
 	{
-		$url = $this->prepare_api_url('metadata/list' . (!is_null($parent_metafield_id) ? '/' . $parent_metafield_id : ''));
-		if(!is_null($url))
-		{
-			$args = $this->prepare_api_args('GET');
-			
-			$response = wp_remote_get($url, $args);
-			return json_decode($response['body']);
-		}
-		return null;
+		$uri = 'metadata/list' . (!is_null($parent_metafield_id) ? '/' . $parent_metafield_id : '');
+		return $this->get_response($uri);
 	}
 
     /**
@@ -184,15 +201,30 @@ class DataDwell {
 	 */
 	public function metadata_get_details($metafield_id)
 	{
-		$url = $this->prepare_api_url('metadata/details/' . $metafield_id);
-		if(!is_null($url))
-		{
-			$args = $this->prepare_api_args('GET');
-			
-			$response = wp_remote_get($url, $args);
-			return json_decode($response['body']);
-		}
-		return null;
+		$uri = 'metadata/details/' . $metafield_id;
+		return $this->get_response($uri);
+	}
+
+	/**
+	 * Get asset source url https://datadwell.docs.apiary.io/#reference/assets/source/get-source
+	 *
+	 * @return Returns URL to the source file for the asset.
+	 */
+	public function get_asset_source($asset_id)
+	{
+		$uri = 'assets/source/' . $asset_id;
+		return $this->get_response($uri);
+	}
+
+	/**
+	 * Get asset thumbnail urls https://datadwell.docs.apiary.io/#reference/assets/thumbnail/get-thumbnail
+	 *
+	 * @return Returns URL to the source file for the asset.
+	 */
+	public function get_asset_thumbnail($asset_id, $size = 'medium')
+	{
+		$uri = 'assets/thumbnail/'.$asset_id .'/'.$size;
+		return $this->get_response($uri);
 	}
 
     /**
@@ -203,6 +235,28 @@ class DataDwell {
 	public function folder_create($name, $parent_folder_id)
 	{
 		return 1;
+	}
+
+	/**
+	 * Get folders
+	 *
+	 * @return Get all subfolders for given folder. If no folder ID is provided the base folders will be returned.
+	 */
+	public function get_folders($folder_id = null)
+	{
+		$uri = 'folders/list' . (!is_null($folder_id) ? '/' . $folder_id : '');
+		return $this->get_response($uri);
+	}
+
+	/**
+	 * Get folder details
+	 *
+	 * @return Return base details for the folder.
+	 */
+	public function get_folder_details($folder_id)
+	{
+		$uri = 'folders/details/' . $folder_id;
+		return $this->get_response($uri);
 	}
 
     /**

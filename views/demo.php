@@ -17,6 +17,46 @@ endif;
 
 ?>
 
+
+<?php
+/* DEMO */
+//print 'All folders -3003';
+//$folders = DataDwell()->get_folders(-3003);
+//var_dump($folders);
+
+//print 'Folder Details - 70';
+//$folder_details = DataDwell()->get_folder_details(70);
+//var_dump($folder_details);
+
+
+/*
+print 'Asset search';
+$includes = ['include_iptc' => false, 'include_metadata' => true, 'include_tags' => true];
+$additional_params = ['folder_id' => 427, 'tag_id' => 39, 'filter' => ['date_created' => ['from' => 1544193649]]];
+$asset_container = DataDwell()->asset_search('', 0, 20, $includes, $additional_params);
+var_dump($asset_container);
+$previews = DataDwell()->asset_previews($asset_container);
+var_dump($previews);
+*/
+
+//print 'Tags search';
+//$tag = DataDwell()->tags_search("00123595");
+//var_dump($tag);
+
+
+//print 'Asset source';
+//$source = DataDwell()->get_asset_source(111);
+//var_dump($source);
+
+//print 'Asset source';
+//$source = DataDwell()->get_asset_thumbnail(111);
+//var_dump($source);
+
+
+/* END DEMO */
+
+?>
+
 <?php
 // Fetch all metafields
 $metafields = DataDwell()->metadata_get_fields();
