@@ -76,6 +76,22 @@ class DataDwell {
 		return null;
 	}
 
+	private function get_response($uri, $body = null, $includes = null, $method = 'GET'){
+		$url = $this->prepare_api_url($uri, $includes);
+		if(!is_null($url))
+		{
+			$args = $this->prepare_api_args($method);
+
+			if($body){
+				$args['body'] = json_encode($body);
+			}
+
+			$response = wp_remote_get($url, $args);
+			return json_decode($response['body']);
+		}
+		return null;
+	}
+
     /**
 	 * Asset search, simple text search of assets
 	 *
@@ -83,6 +99,7 @@ class DataDwell {
 	 */
 	public function asset_search($query, $from = 0, $size = 20, $includes = null, $additional_params = null)
 	{
+
 		$url = $this->prepare_api_url('assets/search', $includes);
 		if(!is_null($url))
 		{
@@ -100,7 +117,6 @@ class DataDwell {
 			];
 
 			$args['body'] = json_encode((object)$params);
-
 			$response = wp_remote_post($url, $args);
 			return json_decode($response['body']);
 		}
@@ -115,30 +131,11 @@ class DataDwell {
 	 */
 	public function asset_search_advanced($body, $from = 0, $size = 20, $includes = null)
 	{
-		$url = $this->prepare_api_url('assets/search', $includes);
-		if(!is_null($url))
-		{
-			$args = $this->prepare_api_args();
-			$body->from = $from;
-			$body->size = $size;
-			$args['body'] = json_encode($body);
-			$response = wp_remote_post($url, $args);
-			return json_decode($response['body']);
-		}
-		return null;
-	}
+		$body->from = $from;
+		$body->size = $size;
+		$uri = 'assets/search';
 
-	public function tags_search($value)
-	{
-		$url = $this->prepare_api_url('tags/search');
-		if(!is_null($url))
-		{
-			$args = $this->prepare_api_args();
-			$args['body'] = json_encode( ["query" => $value] );
-			$response = wp_remote_post($url, $args);
-			return json_decode($response['body']);
-		}
-		return null;
+		return $this->get_response($uri, $body, $includes);
 	}
 
     /**
@@ -148,37 +145,42 @@ class DataDwell {
 	 */
 	public function asset_previews($assets)
 	{
-		$url = $this->prepare_api_url('assets/preview');
-		if(!is_null($url))
+		if(is_numeric($assets))
 		{
-			if(is_numeric($assets))
-			{
-				$asset_ids = [$assets];
-			}
-			else if(is_object($assets))
-			{
-				$asset_ids = [];
-				if(!empty($assets->assets)) {
-					foreach ( $assets->assets as $asset ) {
-						$asset_ids[] = $asset->id;
-					}
+			$asset_ids = [$assets];
+		}
+		else if(is_object($assets))
+		{
+			$asset_ids = [];
+			if(!empty($assets->assets)) {
+				foreach ( $assets->assets as $asset ) {
+					$asset_ids[] = $asset->id;
 				}
 			}
-			else if(is_array($assets))
-			{
-				$asset_ids = $assets;
-			}
-			else
-			{
-				return [];
-			}
-			$args = $this->prepare_api_args();
-			$args['body'] = json_encode($asset_ids);
-			
-			$response = wp_remote_post($url, $args);
-			return json_decode($response['body']);
 		}
-		return null;
+		else if(is_array($assets))
+		{
+			$asset_ids = $assets;
+		}
+		else
+		{
+			return [];
+		}
+
+		$uri = 'assets/preview';
+		return $this->get_response($uri, $asset_ids, null, 'POST');
+	}
+
+	/**
+	 * https://datadwell.docs.apiary.io/#reference/tag/search/search-tags
+	 *
+	 * @return Return list of tags matching the query.
+	 */
+	public function tags_search($value)
+	{
+		$body = ["query" => $value];
+		$uri = 'tags/search';
+		return $this->get_response($uri, $body);
 	}
 
     /**
@@ -188,15 +190,8 @@ class DataDwell {
 	 */
 	public function metadata_get_fields($parent_metafield_id = null)
 	{
-		$url = $this->prepare_api_url('metadata/list' . (!is_null($parent_metafield_id) ? '/' . $parent_metafield_id : ''));
-		if(!is_null($url))
-		{
-			$args = $this->prepare_api_args('GET');
-			
-			$response = wp_remote_get($url, $args);
-			return json_decode($response['body']);
-		}
-		return null;
+		$uri = 'metadata/list' . (!is_null($parent_metafield_id) ? '/' . $parent_metafield_id : '');
+		return $this->get_response($uri);
 	}
 
     /**
@@ -206,15 +201,8 @@ class DataDwell {
 	 */
 	public function metadata_get_details($metafield_id)
 	{
-		$url = $this->prepare_api_url('metadata/details/' . $metafield_id);
-		if(!is_null($url))
-		{
-			$args = $this->prepare_api_args('GET');
-			
-			$response = wp_remote_get($url, $args);
-			return json_decode($response['body']);
-		}
-		return null;
+		$uri = 'metadata/details/' . $metafield_id;
+		return $this->get_response($uri);
 	}
 
 	/**
@@ -224,15 +212,8 @@ class DataDwell {
 	 */
 	public function get_asset_source($asset_id)
 	{
-		$url = $this->prepare_api_url('assets/source/' . $asset_id);
-		if(!is_null($url))
-		{
-			$args = $this->prepare_api_args('GET');
-
-			$response = wp_remote_get($url, $args);
-			return json_decode($response['body']);
-		}
-		return null;
+		$uri = 'assets/source/' . $asset_id;
+		return $this->get_response($uri);
 	}
 
 	/**
@@ -242,15 +223,8 @@ class DataDwell {
 	 */
 	public function get_asset_thumbnail($asset_id, $size = 'medium')
 	{
-		$url = $this->prepare_api_url('assets/thumbnail/'.$asset_id .'/'.$size);
-		if(!is_null($url))
-		{
-			$args = $this->prepare_api_args('GET');
-
-			$response = wp_remote_get($url, $args);
-			return json_decode($response['body']);
-		}
-		return null;
+		$uri = 'assets/thumbnail/'.$asset_id .'/'.$size;
+		return $this->get_response($uri);
 	}
 
     /**
@@ -270,15 +244,8 @@ class DataDwell {
 	 */
 	public function get_folders($folder_id = null)
 	{
-		$url = $this->prepare_api_url('folders/list/' . $folder_id);
-		if(!is_null($url))
-		{
-			$args = $this->prepare_api_args('GET');
-
-			$response = wp_remote_get($url, $args);
-			return json_decode($response['body']);
-		}
-		return null;
+		$uri = 'folders/list' . (!is_null($folder_id) ? '/' . $folder_id : '');
+		return $this->get_response($uri);
 	}
 
 	/**
@@ -288,15 +255,8 @@ class DataDwell {
 	 */
 	public function get_folder_details($folder_id)
 	{
-		$url = $this->prepare_api_url('folders/details/' . $folder_id);
-		if(!is_null($url))
-		{
-			$args = $this->prepare_api_args('GET');
-
-			$response = wp_remote_get($url, $args);
-			return json_decode($response['body']);
-		}
-		return null;
+		$uri = 'folders/details/' . $folder_id;
+		return $this->get_response($uri);
 	}
 
     /**
