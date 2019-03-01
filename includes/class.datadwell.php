@@ -216,7 +216,7 @@ class DataDwell {
 	{
 		$body = ["query" => $value];
 		$uri = 'tags/search';
-		return $this->get_response($uri, $body);
+		return $this->get_response($uri, $body, null, 'POST');
 	}
 
 	/**
@@ -224,7 +224,7 @@ class DataDwell {
 	 *
 	 * @return object directly from the API: https://datadwell.docs.apiary.io/#reference/metadata/list/get-all-metadata
 	 */
-	public function metadata_get_fields($parent_metafield_id = null)
+	public function metadata_get_list($parent_metafield_id = null)
 	{
 		$uri = 'metadata/list' . (!is_null($parent_metafield_id) ? '/' . $parent_metafield_id : '');
 		return $this->get_response($uri);
