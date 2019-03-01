@@ -138,6 +138,17 @@ class DataDwell {
 		return $this->get_response($uri, $body, $includes);
 	}
 
+	/**
+	 * Returns details for a single asset. Metadata, IPTC and tags will always be empty unless you request them.
+	 *
+	 * @return object directly from the API: https://datadwell.docs.apiary.io/#reference/assets/details/get-asset-details
+	 */
+	public function get_asset_details($asset_id, $includes)
+	{
+		$uri = 'assets/details/' . $asset_id;
+		return $this->get_response($uri, null, $includes);
+	}
+
     /**
 	 * Asset previews, fetch thumbnails and previews for assets
 	 *
@@ -156,6 +167,8 @@ class DataDwell {
 				foreach ( $assets->assets as $asset ) {
 					$asset_ids[] = $asset->id;
 				}
+			} else if(!empty($assets->id)){
+				$asset_ids[] = $assets->id;
 			}
 		}
 		else if(is_array($assets))
@@ -169,40 +182,6 @@ class DataDwell {
 
 		$uri = 'assets/preview';
 		return $this->get_response($uri, $asset_ids, null, 'POST');
-	}
-
-	/**
-	 * https://datadwell.docs.apiary.io/#reference/tag/search/search-tags
-	 *
-	 * @return Return list of tags matching the query.
-	 */
-	public function tags_search($value)
-	{
-		$body = ["query" => $value];
-		$uri = 'tags/search';
-		return $this->get_response($uri, $body);
-	}
-
-    /**
-	 * List of all metafields available to assign to assets
-	 *
-	 * @return object directly from the API: https://datadwell.docs.apiary.io/#reference/metadata/list/get-all-metadata
-	 */
-	public function metadata_get_fields($parent_metafield_id = null)
-	{
-		$uri = 'metadata/list' . (!is_null($parent_metafield_id) ? '/' . $parent_metafield_id : '');
-		return $this->get_response($uri);
-	}
-
-    /**
-	 * Get metadata details about specific metadata
-	 *
-	 * @return object directly from the API: https://datadwell.docs.apiary.io/#reference/metadata/details/get-metadata-details
-	 */
-	public function metadata_get_details($metafield_id)
-	{
-		$uri = 'metadata/details/' . $metafield_id;
-		return $this->get_response($uri);
 	}
 
 	/**
@@ -224,6 +203,41 @@ class DataDwell {
 	public function get_asset_thumbnail($asset_id, $size = 'medium')
 	{
 		$uri = 'assets/thumbnail/'.$asset_id .'/'.$size;
+		return $this->get_response($uri);
+	}
+
+
+	/**
+	 * https://datadwell.docs.apiary.io/#reference/tag/search/search-tags
+	 *
+	 * @return Return list of tags matching the query.
+	 */
+	public function tags_search($value)
+	{
+		$body = ["query" => $value];
+		$uri = 'tags/search';
+		return $this->get_response($uri, $body);
+	}
+
+	/**
+	 * List of all metafields available to assign to assets
+	 *
+	 * @return object directly from the API: https://datadwell.docs.apiary.io/#reference/metadata/list/get-all-metadata
+	 */
+	public function metadata_get_fields($parent_metafield_id = null)
+	{
+		$uri = 'metadata/list' . (!is_null($parent_metafield_id) ? '/' . $parent_metafield_id : '');
+		return $this->get_response($uri);
+	}
+
+	/**
+	 * Get metadata details about specific metadata
+	 *
+	 * @return object directly from the API: https://datadwell.docs.apiary.io/#reference/metadata/details/get-metadata-details
+	 */
+	public function metadata_get_details($metafield_id)
+	{
+		$uri = 'metadata/details/' . $metafield_id;
 		return $this->get_response($uri);
 	}
 

@@ -52,6 +52,13 @@ var_dump($previews);
 //$source = DataDwell()->get_asset_thumbnail(111);
 //var_dump($source);
 
+/*print 'Asset details';
+$includes = ['include_iptc' => false, 'include_metadata' => true, 'include_tags' => true];
+$asset_details = DataDwell()->get_asset_details(111, $includes);
+//var_dump($asset_details);
+$previews = DataDwell()->asset_previews($asset_details);
+var_dump($previews);*/
+
 
 /* END DEMO */
 
