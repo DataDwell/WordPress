@@ -280,7 +280,35 @@ class DataDwell {
 	 */
 	public function upload_url($folder_id)
 	{
-		return '//upload';
+		$body = ["folder_id" => $folder_id];
+		$uri = 'folders/upload';
+		return $this->get_response($uri, $body, null, 'POST');
+	}
+
+
+	public function upload_asset($url, $title, $file){
+		$headers = [
+			'Connection: Keep-Alive',
+			'User-Agent: DD-SOAP-Client/1.0',
+		];
+
+		$cfile = curl_file_create($file);
+
+		$posts = [
+			'name' => $title,
+			'file' => $cfile,
+		];
+
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $posts);
+		curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+		$response = curl_exec($ch);
+		curl_close($ch);
+
+		return $result = json_decode($response);
 	}
 
     /**
