@@ -286,7 +286,7 @@ class DataDwell {
 	}
 
 
-	public function upload_asset($url, $title, $file){
+	public function upload_asset($url, $title, $file, $metafields){
 		$headers = [
 			'Connection: Keep-Alive',
 			'User-Agent: DD-SOAP-Client/1.0',
@@ -297,6 +297,7 @@ class DataDwell {
 		$posts = [
 			'name' => $title,
 			'file' => $cfile,
+			'metafields' => $metafields
 		];
 
 		$ch = curl_init($url);
