@@ -286,7 +286,7 @@ class DataDwell {
 	}
 
 
-	public function upload_asset($url, $title, $file, $metafields){
+	public function upload_asset($url, $title, $file, $metafields, $tags){
 		$headers = [
 			'Connection: Keep-Alive',
 			'User-Agent: DD-SOAP-Client/1.0',
@@ -297,8 +297,14 @@ class DataDwell {
 		$posts = [
 			'name' => $title,
 			'file' => $cfile,
-			'metafields' => $metafields
+			'taggroups[0]' => $tags,
 		];
+
+		if(!empty($metafields)){
+			foreach($metafields as $key => $value){
+				$posts['metafields['.$key.'][]'] = $value;
+			}
+		}
 
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
